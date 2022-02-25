@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+
+    upkeep_db:
+        image: postgres
+        container_name: "prisma_db"
+        expose:
+            - "5432"
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./dev/postgres-data:/var/lib/postgresql/data
+        env_file: "dev/envs/db.env"
