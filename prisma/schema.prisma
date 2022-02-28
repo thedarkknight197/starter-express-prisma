@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -12,6 +12,37 @@ model User {
   email String  @unique
   name  String?
   posts Post[]
+  role  Role    @default(USER)
+}
+
+model Product {
+  id         Int        @id @default(autoincrement())
+  sku        String
+  name       String
+  price      Decimal
+  cost       Decimal
+  categories Category[] @relation(references: [id])
+  tags       Tag[]      @relation(references: [name])
+  comments   Comment[]
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[] @relation(references: [id])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  products  Product? @relation(fields: [productId], references: [id]) // A comment can have one post
+  productId Int?
+}
+
+model Tag {
+  name  String    @id
+  posts Product[] @relation(references: [id])
 }
 
 model Post {
@@ -24,4 +55,10 @@ model Post {
   viewCount Int      @default(0)
   author    User?    @relation(fields: [authorId], references: [id])
   authorId  Int?
+}
+
+enum Role {
+  USER
+  CREATOR
+  ADMIN
 }
