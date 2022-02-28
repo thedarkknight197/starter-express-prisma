@@ -27,22 +27,6 @@ router.get('/:id/drafts', async (req, res) => {
     res.json(drafts)
 })
 
-router.post(`/signup`, async (req, res) => {
-    const { name, email } = req.body
-
-    // const postData = posts?.map((post: Prisma.PostCreateInput) => {
-    //     return { title: post?.title, content: post?.content }
-    // })
-
-    const result = await prisma.user.create({
-        data: {
-            name,
-            email,
-        },
-    })
-    res.json(result)
-})
-
 /** 
     posts: {
         create: postData,

@@ -1,10 +1,21 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { NextFunction, Request, Response } from "express"
+import { validationResult } from "express-validator/check";
 import Controller from '../Controller';
+
 
 class ProductController extends Controller {
     
     async createProduct (req: Request, res: Response) {
+        const errors = validationResult(req);
+
+        if(!errors.isEmpty()){
+            return res.status(422).json({
+                message: 'Errore input',
+                error: errors
+            });
+        }
+
         const { name, sku, cost, price, categories, tags } = req.body
         try {
             const result = await this.prisma.product.create({

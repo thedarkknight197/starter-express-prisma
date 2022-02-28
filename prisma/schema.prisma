@@ -11,13 +11,15 @@ model User {
   id    Int     @id @default(autoincrement())
   email String  @unique
   name  String?
+  username  String @unique
+  password  String
   posts Post[]
   role  Role    @default(USER)
 }
 
 model Product {
   id         Int        @id @default(autoincrement())
-  sku        String
+  sku        String     @unique
   name       String
   price      Decimal
   cost       Decimal
