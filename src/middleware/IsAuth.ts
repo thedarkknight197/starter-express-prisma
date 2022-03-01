@@ -1,12 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { NextFunction,  Request,  Response } from "express";
-import Controller from "../controllers/Controller";
 import { RequestUser } from '../interface/request/RequestUserInterface';
-
-const jwt = require("jsonwebtoken");
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { JWTContent } from '../interface/JWT/JWTContent';
 
 class IsAuth{
-    
     public static async verify(req: RequestUser, res: Response, next: NextFunction) {
         const prisma = new PrismaClient();
         const authorization = req.get('Authorization');
@@ -16,26 +14,29 @@ class IsAuth{
                 msg: "Non autorizzato"
             })
         }
-        
+
         const token: string = authorization.split(' ')[1];
         
-        let decode;
+        let decode: string|JwtPayload;
+        let jwtDecoded: JWTContent;
         
         try {
-            decode = jwt.verify(token, process.env["JWT_SECRET"]);
+            const secret : string = process.env.JWT_SECRET ?? "";            
+            decode = jwt.verify(token, secret)
+            jwtDecoded = <JWTContent>decode;
         } catch (error) {
             return res.status(500).json({
-                msg: "Non autorizzato!!"
+                msg: "Non autorizzato!!",
+                erros: error
             })
         }
-        
-        if (!decode) {
+        if (!jwtDecoded) {
             return res.status(401).json({
                 msg: "Non autorizzato!!"
             });
         }
-
-        let userId = decode.id;
+        
+        let userId: number = jwtDecoded.id;
 
         const user = await prisma.user.findFirst({where: {id: userId}});
         if (user) {
@@ -49,4 +50,3 @@ class IsAuth{
 }
 
 export default IsAuth;
-
