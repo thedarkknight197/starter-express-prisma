@@ -1,11 +1,9 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { Request, Response } from "express";
 import { validationResult } from "express-validator/check";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import Controller from "../Controller";
-
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-
 
 class AuthController extends Controller {
 
@@ -19,7 +17,7 @@ class AuthController extends Controller {
 
         bcrypt.hash(password, 12).then(async(hashedPassword: string)=>{
             try {
-                const result = await this.prisma.user.create({
+                const result: User = await this.prisma.user.create({
                     data: {
                         username,
                         name,
@@ -31,7 +29,6 @@ class AuthController extends Controller {
             } catch (error) {
                 return res.status(422).json({errors: error})
             }
-            
         }).catch((error: string) => res.status(422).json({errors: error}))
     }
     
@@ -40,21 +37,18 @@ class AuthController extends Controller {
         if (!error.isEmpty()) {
             return res.status(422).json({errors: error})
         }
-        
         const {email, password} = req.body;
-        
 
         const fields : Prisma.UserWhereInput = {
             email
         }
 
-        const user = await this.prisma.user.findFirst({
+        const user: User | null = await this.prisma.user.findFirst({
             where: {
                 ...fields
             }
         })
 
-        
         if (!user) {
             return res.status(401).json({msg: "Non autorizzato, email errata!"})
         } else {
@@ -67,7 +61,7 @@ class AuthController extends Controller {
                     id: user.id,
                     email: user.email,
                     name: user.name,
-                }, process.env["JWT_SECRET"], {expiresIn: '1h'});
+                }, process.env.JWT_SECRET ?? "", {expiresIn: '1h'});
                 return res.status(201).json({
                     msg: "Sei Loggato",
                     id: user.id,
