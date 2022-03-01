@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Post } from '@prisma/client';
 import { NextFunction, Request, Response } from "express"
 import Controller from '../Controller';
 
@@ -7,7 +7,7 @@ class PostController extends Controller{
     async createPost(req: Request, res: Response){
         const { title, content, authorEmail } = req.body
         try {
-            const result = await this.prisma.post.create({
+            const result: Post = await this.prisma.post.create({
                 data: {
                     title,
                     content,
@@ -24,16 +24,21 @@ class PostController extends Controller{
     async getPost(req: Request, res: Response){
         const { id }: { id?: string } = req.params
     
-        const post = await this.prisma.post.findUnique({
+        const post: Post | null = await this.prisma.post.findUnique({
             where: { id: Number(id) },
         })
 
-        res.json(post)
+        if (!post) {
+            res.status(404).json({msg: `post ${id} not found`})
+        } else {
+            res.status(200).json(post)
+        }
+
     }
 
     async deletePost(req: Request, res: Response){
         const { id } = req.params
-        const post = await this.prisma.post.delete({
+        const post: Post = await this.prisma.post.delete({
             where: {
                 id: Number(id),
             },
@@ -45,7 +50,7 @@ class PostController extends Controller{
         const { id } = req.params
 
         try {
-            const post = await this.prisma.post.update({
+            const post: Post = await this.prisma.post.update({
                 where: { id: Number(id) },
                 data: {
                     viewCount: {
@@ -64,14 +69,14 @@ class PostController extends Controller{
         const { id } = req.params
 
         try {
-            const postData = await this.prisma.post.findUnique({
-            where: { id: Number(id) },
+            const postData: { published: boolean;} | null = await this.prisma.post.findUnique({
+                where: { id: Number(id) },
                 select: {
                     published: true,
                 },
             })
 
-            const updatedPost = await this.prisma.post.update({
+            const updatedPost: Post = await this.prisma.post.update({
                 where: { id: Number(id) || undefined },
                 data: { published: !postData?.published },
             })

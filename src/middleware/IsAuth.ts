@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { NextFunction,  Request,  Response } from "express";
 import { RequestUser } from '../interface/request/RequestUserInterface';
 import jwt, { JwtPayload } from "jsonwebtoken";
@@ -38,7 +38,7 @@ class IsAuth{
         
         let userId: number = jwtDecoded.id;
 
-        const user = await prisma.user.findFirst({where: {id: userId}});
+        const user: User | null = await prisma.user.findFirst({where: {id: userId}});
         if (user) {
             req.user = user;
             console.log(req.user);
