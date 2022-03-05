@@ -1,69 +1,67 @@
-import { Prisma, PrismaClient } from '@prisma/client';
-import { NextFunction, Request, Response } from "express"
+import { Request, Response } from "express";
 import { validationResult } from "express-validator/check";
-import Controller from '../Controller';
-
+import Controller from "../Controller";
 
 class ProductController extends Controller {
-    
-    async createProduct (req: Request, res: Response) {
-        const errors = validationResult(req);
+  async createProduct(req: Request, res: Response) {
+    const errors = validationResult(req);
 
-        if(!errors.isEmpty()){
-            return res.status(422).json({
-                message: 'Errore input',
-                error: errors
-            });
-        }
-
-        const { name, sku, cost, price, categories, tags } = req.body
-        try {
-            const result = await this.prisma.product.create({
-                data: {
-                    name: name,
-                    sku: sku,
-                    cost: cost,
-                    price: price,
-                    categories: categories,
-                    tags: tags
-                },
-            })
-            res.json(result)
-        } catch (error) {
-            res.status(404).json({error: error});
-        }
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        message: "Errore input",
+        error: errors,
+      });
     }
-    
-    async getProduct (req: Request, res: Response){
-        const { id }: { id?: string } = req.params
 
-        const post = await this.prisma.product.findUnique({
-            where: { id: Number(id) },
-        })
-
-        if (post) {
-            res.json(post)    
-        } else {
-            res.status(404).json({"msg": "Product don't found"});
-        }
-
+    const {
+      name, sku, cost, price, categories, tags,
+    } = req.body;
+    try {
+      const result = await this.prisma.product.create({
+        data: {
+          name,
+          sku,
+          cost,
+          price,
+          categories,
+          tags,
+        },
+      });
+      return res.json(result);
+    } catch (error) {
+      return res.status(404).json({ error });
     }
-    
-    async allProduct (req: Request, res: Response){
-        const post = await this.prisma.product.findMany({});
+  }
 
-        res.json(post);
+  async getProduct(req: Request, res: Response) {
+    const { id }: { id?: string } = req.params;
+
+    const post = await this.prisma.product.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (post) {
+      res.json(post);
+    } else {
+      res.status(404).json({ msg: "Product don't found" });
     }
-    
-    async deleteProduct(req: Request, res: Response) {
-        const { id } = req.params
-        const post = await this.prisma.product.delete({
-            where: {
-                id: Number(id),
-            },
-        })
-        res.json(post)
-    }
+  }
+
+  async allProduct(req: Request, res: Response) {
+    const post = await this.prisma.product.findMany({});
+
+    res.json(post);
+  }
+
+  async deleteProduct(req: Request, res: Response) {
+    const { id } = req.params;
+    const post = await this.prisma.product.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+    return res.json(post);
+  }
 }
 
 export default ProductController;

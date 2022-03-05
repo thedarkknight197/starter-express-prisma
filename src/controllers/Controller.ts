@@ -1,11 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 abstract class Controller {
-    protected prisma: PrismaClient;
+  protected prisma: PrismaClient;
 
-    constructor() {
-        this.prisma = new PrismaClient();
-    }
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
 }
 
 export default Controller;
